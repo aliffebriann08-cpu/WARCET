@@ -1,0 +1,714 @@
+
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warcet Admin - Data Pekerja & Status Warung</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        /* Custom scrollbar untuk kenyamanan mobile view */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #eab308;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-slate-955 bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+
+    <!-- LOGIN CONTAINER -->
+    <div id="login-container" class="flex-1 flex items-center justify-center p-4">
+        <div class="bg-slate-900 p-8 rounded-3xl shadow-2xl border border-slate-800 w-full max-w-md">
+            <div class="text-center mb-8">
+                <!-- Tampilan Logo Warcet -->
+                <div class="flex justify-center mb-4">
+                    <div class="w-48 h-20 flex items-center justify-center overflow-hidden">
+                        <!-- Mencoba memuat logo.png dari folder yang sama -->
+                        <img src="logo.png" alt="WARCET Logo" id="login-logo" 
+                             onerror="this.onerror=null; this.classList.add('hidden'); document.getElementById('login-text-logo').classList.remove('hidden');" 
+                             class="max-w-full max-h-full object-contain">
+                        <!-- Jika logo.png tidak ditemukan, tampilkan teks bergaya emas ini -->
+                        <div id="login-text-logo" class="hidden text-3xl font-black tracking-wider text-yellow-500 font-sans italic">
+                            WAR<span class="text-white">CET</span>
+                        </div>
+                    </div>
+                </div>
+                <h1 class="text-xl font-bold text-slate-200 tracking-tight">Admin System</h1>
+                <p class="text-xs text-slate-400 mt-1">Sistem Pendataan & Monitoring Pekerja</p>
+            </div>
+
+            <form id="login-form" class="space-y-5">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Username</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
+                            <i data-lucide="user" class="w-5 h-5"></i>
+                        </span>
+                        <input type="text" id="username" required
+                            class="w-full pl-11 pr-4 py-3 bg-slate-800/80 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all text-sm text-slate-100 placeholder-slate-500"
+                            placeholder="Masukkan username">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Password</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
+                            <i data-lucide="lock" class="w-5 h-5"></i>
+                        </span>
+                        <input type="password" id="password" required
+                            class="w-full pl-11 pr-4 py-3 bg-slate-800/80 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all text-sm text-slate-100 placeholder-slate-500"
+                            placeholder="Masukkan password">
+                    </div>
+                </div>
+
+                <div id="login-error" class="hidden text-red-400 text-xs bg-red-950/50 p-3 rounded-lg border border-red-900/50 flex items-center gap-2">
+                    <i data-lucide="alert-circle" class="w-4 h-4 flex-shrink-0"></i>
+                    <span>Username atau Password salah!</span>
+                </div>
+
+                <button type="submit" 
+                    class="w-full bg-yellow-500 hover:bg-yellow-600 text-slate-950 font-bold py-3 px-4 rounded-xl shadow-lg shadow-yellow-500/10 transition-colors flex items-center justify-center gap-2">
+                    <span>Masuk ke Dashboard</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- DASHBOARD CONTAINER -->
+    <div id="dashboard-container" class="hidden flex-1 flex flex-col">
+        <!-- Top Navigation -->
+        <nav class="bg-slate-900 border-b border-slate-800 sticky top-0 z-10 px-4 py-2">
+            <div class="max-w-7xl mx-auto flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="h-10 w-24 flex items-center justify-center overflow-hidden">
+                        <!-- Memuat logo.png di navigasi atas -->
+                        <img src="logo.png" alt="WARCET Logo" id="nav-logo" 
+                             onerror="this.onerror=null; this.classList.add('hidden'); document.getElementById('nav-text-logo').classList.remove('hidden');" 
+                             class="max-w-full max-h-full object-contain">
+                        <div id="nav-text-logo" class="hidden text-lg font-black tracking-wider text-yellow-500 italic">
+                            WAR<span class="text-white">CET</span>
+                        </div>
+                    </div>
+                    <span class="text-[10px] text-yellow-500 font-bold bg-yellow-500/10 border border-yellow-500/20 px-2 py-0.5 rounded-full uppercase tracking-wider hidden sm:inline">
+                        Admin Mode
+                    </span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-sm font-semibold text-slate-300 hidden sm:inline">Hi, Sukorejo</span>
+                    <button id="logout-btn" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-950/30 rounded-xl border border-transparent hover:border-red-900/40 transition-all" title="Keluar">
+                        <i data-lucide="log-out" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content Grid -->
+        <main class="max-w-7xl w-full mx-auto p-4 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- COLUMN KIRI: STATUS TIME & FORM -->
+            <div class="lg:col-span-4 space-y-6">
+                
+                <!-- BANNER JAM OPERASIONAL REAL-TIME -->
+                <div id="status-warung-card" class="p-5 rounded-2xl border transition-all duration-300 shadow-lg bg-slate-900 border-slate-800">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">Waktu Saat Ini</span>
+                            <span id="live-clock" class="text-2xl font-black text-slate-100 tracking-tight font-mono">00:00:00</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">Status Warung</span>
+                            <span id="live-status-badge" class="inline-block mt-1 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wide">
+                                Memuat...
+                            </span>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between text-[11px] text-slate-400 font-semibold">
+                        <div><span class="text-yellow-500">Pagi:</span> 08:30 - 15:00</div>
+                        <div><span class="text-yellow-500">Malam:</span> 19:00 - 00:00</div>
+                    </div>
+                </div>
+
+                <!-- FORM INPUT -->
+                <div class="bg-slate-900 p-6 rounded-2xl shadow-lg border border-slate-800">
+                    <div class="flex items-center gap-2.5 mb-4">
+                        <i data-lucide="user-plus" class="w-5 h-5 text-yellow-500"></i>
+                        <h2 id="form-title" class="text-lg font-bold text-slate-100">Tambah Data Pekerja</h2>
+                    </div>
+
+                    <!-- Notifikasi Aksi -->
+                    <div id="action-toast" class="hidden mb-4 p-3 rounded-xl text-xs font-semibold flex items-center gap-2">
+                        <i id="toast-icon" data-lucide="check-circle" class="w-4 h-4"></i>
+                        <span id="toast-msg"></span>
+                    </div>
+
+                    <form id="pekerja-form" class="space-y-4">
+                        <input type="hidden" id="edit-id">
+
+                        <!-- Nama Pekerja -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Nama Pekerja</label>
+                            <input type="text" id="pekerja-name" required
+                                class="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all text-sm text-slate-100 placeholder-slate-550 placeholder-slate-500"
+                                placeholder="Masukkan nama lengkap">
+                        </div>
+
+                        <!-- Status Pekerja -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Status Pekerja</label>
+                            <select id="pekerja-status" required
+                                class="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all text-sm text-slate-100">
+                                <option value="Aktif">Aktif</option>
+                                <option value="Non-aktif">Non-aktif</option>
+                            </select>
+                        </div>
+
+                        <!-- Penempatan -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Penempatan</label>
+                            <select id="pekerja-penempatan" required
+                                class="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all text-sm text-slate-100">
+                                <option value="" disabled selected>-- Pilih Lokasi Penempatan --</option>
+                                <option value="WCT.35.01.17.001 (Marlhena)">WCT.35.01.17.001 (Marlhena)</option>
+                                <option value="WCT.35.01.17.002 (Buk sum)">WCT.35.01.17.002 (Buk sum)</option>
+                                <option value="WCT.35.02.18.001 (menyek)">WCT.35.02.18.001 (menyek)</option>
+                                <option value="WCT.35.02.18.002 (dewi)">WCT.35.02.18.002 (dewi)</option>
+                                <option value="WCT.35.02.18.003 (Ruko biru)">WCT.35.02.18.003 (Ruko biru)</option>
+                                <option value="WCT.35.02.18.004 (ika)">WCT.35.02.18.004 (ika)</option>
+                                <option value="WCT.35.02.18.005 (menyek)">WCT.35.02.18.005 (menyek)</option>
+                                <option value="WCT.35.02.18.006 (dewi)">WCT.35.02.18.006 (dewi)</option>
+                                <option value="WCT.35.02.18.007 (buk sum)">WCT.35.02.18.007 (buk sum)</option>
+                                <option value="WCT.35.02.18.008 (ijo tegongan)">WCT.35.02.18.008 (ijo tegongan)</option>
+                                <option value="WCT.35.03.19.001 (meli)">WCT.35.03.19.001 (meli)</option>
+                                <option value="WCT.35.02.18.009 (ika)">WCT.35.02.18.009 (ika)</option>
+                                <option value="WCT.35.02.18.010 (kenyot)">WCT.35.02.18.010 (kenyot)</option>
+                                <option value="WCT.35.04.20.001 (Wina)">WCT.35.04.20.001 (Wina)</option>
+                                <option value="WCT.35.04.20.002 (Wina)">WCT.35.04.20.002 (Wina)</option>
+                                <option value="WCT.35.04.20.003 (Aseh)">WCT.35.04.20.003 (Aseh)</option>
+                                <option value="WCT.35.04.20.004 (RIKA)">WCT.35.04.20.004 (RIKA)</option>
+                                <option value="WCT.35.04.20.005 (YENI)">WCT.35.04.20.005 (YENI)</option>
+                                <option value="WCT.35.04.20.006 (YENI)">WCT.35.04.20.006 (YENI)</option>
+                                <option value="WCT.35.05.21.001 (Amel)">WCT.35.05.21.001 (Amel)</option>
+                            </select>
+                        </div>
+
+                        <!-- Rentang Umur -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Rentang Umur</label>
+                            <select id="pekerja-umur" required
+                                class="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all text-sm text-slate-100">
+                                <option value="17-25">17-25 Tahun</option>
+                                <option value="26-35">26-35 Tahun</option>
+                                <option value="-">-</option>
+                            </select>
+                        </div>
+
+                        <!-- Asal Daerah -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Asal Daerah</label>
+                            <input type="text" id="pekerja-asal" required
+                                class="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all text-sm text-slate-100 placeholder-slate-500"
+                                placeholder="Contoh: Ponorogo, Madiun, dll.">
+                        </div>
+
+                        <!-- Status Hidup (Pernikahan) -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Status Hidup (Pernikahan)</label>
+                            <select id="pekerja-status-hidup" required
+                                class="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all text-sm text-slate-100">
+                                <option value="menikah">menikah</option>
+                                <option value="belum menikah">belum menikah</option>
+                                <option value="cerai sah">cerai sah</option>
+                                <option value="cerai belum sah">cerai belum sah</option>
+                            </select>
+                        </div>
+
+                        <!-- Tombol Aksi -->
+                        <div class="pt-2 flex gap-2">
+                            <button type="submit" id="submit-btn"
+                                class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-slate-950 font-bold py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm text-sm">
+                                <i data-lucide="save" class="w-4 h-4"></i>
+                                <span id="submit-btn-text">Simpan Pekerja</span>
+                            </button>
+                            <button type="button" id="cancel-edit-btn" class="hidden bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2.5 px-4 rounded-xl transition-all text-sm">
+                                Batal
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- RINGKASAN STATISTIK -->
+                <div class="bg-slate-900 p-5 rounded-2xl shadow-lg border border-slate-800">
+                    <h3 class="font-bold text-slate-400 mb-3 text-xs uppercase tracking-wider">Statistik Pekerja</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-yellow-500/5 border border-yellow-500/10 p-3.5 rounded-xl">
+                            <span class="text-[11px] text-yellow-500 block font-bold uppercase tracking-wider">Total Pekerja</span>
+                            <span id="stat-total" class="text-2xl font-black text-slate-100">0</span>
+                        </div>
+                        <div class="bg-emerald-500/5 border border-emerald-500/10 p-3.5 rounded-xl">
+                            <span class="text-[11px] text-emerald-500 block font-bold uppercase tracking-wider">Pekerja...</span>
+                            <span id="stat-aktif" class="text-2xl font-black text-slate-100">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLUMN KANAN: DATABASE -->
+            <div class="lg:col-span-8 space-y-4">
+                <div class="bg-slate-900 rounded-2xl shadow-lg border border-slate-800 overflow-hidden">
+                    <div class="p-6 border-b border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-100">Database Pekerja</h2>
+                            <p class="text-xs text-slate-400">Pencarian instan berdasarkan Nama, Penempatan atau Daerah</p>
+                        </div>
+                        <!-- Pencarian -->
+                        <div class="relative w-full md:w-72">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+                                <i data-lucide="search" class="w-4 h-4"></i>
+                            </span>
+                            <input type="text" id="search-input"
+                                class="w-full pl-9 pr-4 py-2.5 text-sm bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-slate-100 placeholder-slate-500"
+                                placeholder="Cari nama / penempatan / asal...">
+                        </div>
+                    </div>
+
+                    <!-- Tampilan HP (Cards List) -->
+                    <div id="mobile-cards" class="block lg:hidden p-4 space-y-3">
+                        <!-- Dimuat via JS -->
+                    </div>
+
+                    <!-- Tampilan Desktop (Tabel) -->
+                    <div class="hidden lg:block overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-950/40 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800 font-bold">
+                                    <th class="py-4 px-6">Nama Pekerja</th>
+                                    <th class="py-4 px-6">Penempatan</th>
+                                    <th class="py-4 px-6">Umur</th>
+                                    <th class="py-4 px-6">Asal</th>
+                                    <th class="py-4 px-6">Status Hidup</th>
+                                    <th class="py-4 px-6 text-center">Status</th>
+                                    <th class="py-4 px-6 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pekerja-table-body" class="divide-y divide-slate-800/60">
+                                <!-- Dimuat via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="empty-state" class="hidden py-16 px-4 text-center">
+                        <div class="inline-flex p-4 bg-slate-800 text-slate-500 rounded-full mb-3">
+                            <i data-lucide="users-round" class="w-8 h-8"></i>
+                        </div>
+                        <h3 class="text-sm font-semibold text-slate-300">Tidak ada data ditemukan</h3>
+                        <p class="text-xs text-slate-400 mt-1">Silakan tambahkan data atau periksa kata kunci pencarian Anda.</p>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- JavaScript Logika Sistem -->
+    <script>
+        // Data Otentikasi Admin
+        const ADMIN_USER = "Sukorejo";
+        const ADMIN_PASS = "Ponorogo";
+
+        // DOM Elements
+        const loginContainer = document.getElementById('login-container');
+        const dashboardContainer = document.getElementById('dashboard-container');
+        const loginForm = document.getElementById('login-form');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const loginError = document.getElementById('login-error');
+        const logoutBtn = document.getElementById('logout-btn');
+
+        // Form inputs
+        const pekerjaForm = document.getElementById('pekerja-form');
+        const editIdInput = document.getElementById('edit-id');
+        const pekerjaNameInput = document.getElementById('pekerja-name');
+        const pekerjaStatusInput = document.getElementById('pekerja-status');
+        const pekerjaPenempatanInput = document.getElementById('pekerja-penempatan');
+        const pekerjaUmurInput = document.getElementById('pekerja-umur');
+        const pekerjaAsalInput = document.getElementById('pekerja-asal');
+        const pekerjaStatusHidupInput = document.getElementById('pekerja-status-hidup');
+        const submitBtn = document.getElementById('submit-btn');
+        const submitBtnText = document.getElementById('submit-btn-text');
+        const cancelEditBtn = document.getElementById('cancel-edit-btn');
+        const formTitle = document.getElementById('form-title');
+
+        // List & Stats Elements
+        const pekerjaTableBody = document.getElementById('pekerja-table-body');
+        const mobileCards = document.getElementById('mobile-cards');
+        const emptyState = document.getElementById('empty-state');
+        const searchInput = document.getElementById('search-input');
+        const statTotal = document.getElementById('stat-total');
+        const statAktif = document.getElementById('stat-aktif');
+
+        // Notification & Clock Elements
+        const actionToast = document.getElementById('action-toast');
+        const toastIcon = document.getElementById('toast-icon');
+        const toastMsg = document.getElementById('toast-msg');
+        const liveClock = document.getElementById('live-clock');
+        const liveStatusBadge = document.getElementById('live-status-badge');
+        const statusWarungCard = document.getElementById('status-warung-card');
+
+        // --- REAL-TIME CLOCK & STATUS MANAGEMENT ---
+        function updateWarungStatus() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const seconds = now.getSeconds();
+
+            const timeString = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            liveClock.textContent = timeString;
+
+            const totalMinutes = (hours * 60) + minutes;
+
+            const startPagi = (8 * 60) + 30; // 08:30
+            const endPagi = 15 * 60;        // 15:00
+            const startMalam = 19 * 60;     // 19:00
+            const endMalam = 24 * 60;       // 00:00
+
+            let statusText = "";
+            let badgeClass = "";
+            let cardClass = "";
+
+            if (totalMinutes >= startPagi && totalMinutes < endPagi) {
+                statusText = "Buka (Shift Pagi)";
+                badgeClass = "bg-emerald-500 text-slate-950";
+                cardClass = "bg-slate-900 border-emerald-500/30 ring-1 ring-emerald-500/20";
+            } else if (totalMinutes >= startMalam && totalMinutes < endMalam) {
+                statusText = "Buka (Shift Malam)";
+                badgeClass = "bg-yellow-500 text-slate-950";
+                cardClass = "bg-slate-900 border-yellow-500/30 ring-1 ring-yellow-500/20";
+            } else if (totalMinutes >= endPagi && totalMinutes < startMalam) {
+                statusText = "TUTUP (Istirahat Sore)";
+                badgeClass = "bg-rose-500 text-white";
+                cardClass = "bg-slate-900 border-rose-500/30";
+            } else {
+                statusText = "TUTUP (Tidur)";
+                badgeClass = "bg-slate-700 text-slate-300";
+                cardClass = "bg-slate-900 border-slate-800";
+            }
+
+            liveStatusBadge.textContent = statusText;
+            liveStatusBadge.className = `inline-block mt-1 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${badgeClass}`;
+            statusWarungCard.className = `p-5 rounded-2xl border transition-all duration-300 shadow-lg ${cardClass}`;
+        }
+
+        setInterval(updateWarungStatus, 1000);
+        updateWarungStatus();
+
+
+        // --- AUTH SESSION CHECK ---
+        if (sessionStorage.getItem('warcet_logged_in') === 'true') {
+            showDashboard();
+        }
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const user = usernameInput.value.trim();
+            const pass = passwordInput.value.trim();
+
+            if (user === ADMIN_USER && pass === ADMIN_PASS) {
+                sessionStorage.setItem('warcet_logged_in', 'true');
+                loginError.classList.add('hidden');
+                showDashboard();
+                showToast('Selamat Datang, Admin!', 'success');
+            } else {
+                loginError.classList.remove('hidden');
+                passwordInput.value = '';
+            }
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            sessionStorage.removeItem('warcet_logged_in');
+            hideDashboard();
+        });
+
+        function showDashboard() {
+            loginContainer.classList.add('hidden');
+            dashboardContainer.classList.remove('hidden');
+            renderData();
+            lucide.createIcons();
+        }
+
+        function hideDashboard() {
+            dashboardContainer.classList.add('hidden');
+            loginContainer.classList.remove('hidden');
+            usernameInput.value = '';
+            passwordInput.value = '';
+            lucide.createIcons();
+        }
+
+        // --- DATABASE LOCALSTORAGE SINKRONISASI ---
+        function getPekerjaData() {
+            const data = localStorage.getItem('warcet_pekerja');
+            return data ? JSON.parse(data) : [];
+        }
+
+        function savePekerjaData(data) {
+            localStorage.setItem('warcet_pekerja', JSON.stringify(data));
+            renderData();
+        }
+
+        // Simpan / Update Pekerja
+        pekerjaForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const id = editIdInput.value;
+            const name = pekerjaNameInput.value.trim();
+            const status = pekerjaStatusInput.value;
+            const penempatan = pekerjaPenempatanInput.value;
+            const umur = pekerjaUmurInput.value;
+            const asal = pekerjaAsalInput.value.trim();
+            const statusHidup = pekerjaStatusHidupInput.value;
+
+            let currentData = getPekerjaData();
+
+            if (id) {
+                // Update
+                currentData = currentData.map(p => {
+                    if (p.id === id) {
+                        return { ...p, name, status, penempatan, umur, asal, statusHidup };
+                    }
+                    return p;
+                });
+                showToast('Data pekerja berhasil diperbarui!', 'success');
+                resetForm();
+            } else {
+                // Tambah baru
+                const newPekerja = {
+                    id: 'pekerja_' + Date.now(),
+                    name,
+                    status,
+                    penempatan,
+                    umur,
+                    asal,
+                    statusHidup,
+                    createdAt: new Date().toISOString()
+                };
+                currentData.push(newPekerja);
+                showToast('Pekerja baru ditambahkan!', 'success');
+                pekerjaForm.reset();
+            }
+
+            savePekerjaData(currentData);
+        });
+
+        // Edit Pekerja
+        window.editPekerja = function(id) {
+            const list = getPekerjaData();
+            const p = list.find(item => item.id === id);
+
+            if (p) {
+                editIdInput.value = p.id;
+                pekerjaNameInput.value = p.name;
+                pekerjaStatusInput.value = p.status;
+                pekerjaPenempatanInput.value = p.penempatan;
+                pekerjaUmurInput.value = p.umur;
+                pekerjaAsalInput.value = p.asal;
+                pekerjaStatusHidupInput.value = p.statusHidup;
+
+                formTitle.textContent = "Edit Data Pekerja";
+                submitBtnText.textContent = "Simpan Perubahan";
+                submitBtn.classList.replace('bg-yellow-500', 'bg-blue-600');
+                submitBtn.classList.replace('hover:bg-yellow-600', 'hover:bg-blue-700');
+                cancelEditBtn.classList.remove('hidden');
+
+                pekerjaForm.scrollIntoView({ behavior: 'smooth' });
+            }
+        };
+
+        // Batal Edit
+        cancelEditBtn.addEventListener('click', resetForm);
+
+        function resetForm() {
+            pekerjaForm.reset();
+            editIdInput.value = '';
+            formTitle.textContent = "Tambah Data Pekerja";
+            submitBtnText.textContent = "Simpan Pekerja";
+            submitBtn.className = "flex-1 bg-yellow-500 hover:bg-yellow-600 text-slate-950 font-bold py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm text-sm";
+            cancelEditBtn.classList.add('hidden');
+        }
+
+        // Hapus Pekerja (DIPERBAIKI: Mengikat fungsi langsung ke window agar global)
+        window.deletePekerja = function(id) {
+            const yakin = confirm("Apakah Anda yakin ingin menghapus data pekerja ini?");
+            if (yakin) {
+                let list = getPekerjaData();
+                list = list.filter(p => p.id !== id);
+                
+                // Simpan langsung ke localStorage
+                localStorage.setItem('warcet_pekerja', JSON.stringify(list));
+                
+                // Render Ulang tampilan tabel dan card
+                renderData();
+                
+                showToast('Data pekerja telah dihapus.', 'error');
+
+                if (editIdInput.value === id) {
+                    resetForm();
+                }
+            }
+        };
+
+        // Live Search
+        searchInput.addEventListener('input', renderData);
+
+        // Status Badge UI
+        function getStatusBadge(status) {
+            if (status === 'Aktif') {
+                return '<span class="px-2.5 py-1 text-xs font-bold rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Aktif</span>';
+            } else {
+                return '<span class="px-2.5 py-1 text-xs font-bold rounded-full bg-slate-800 text-slate-500 border border-slate-700">Non-aktif</span>';
+            }
+        }
+
+        // Status Hidup Color Badge
+        function getStatusHidupBadge(statusHidup) {
+            let colors = "bg-purple-500/10 text-purple-400 border-purple-500/20";
+            if (statusHidup === "menikah") colors = "bg-blue-500/10 text-blue-400 border-blue-500/20";
+            else if (statusHidup === "belum menikah") colors = "bg-rose-500/10 text-rose-400 border-rose-500/20";
+            else if (statusHidup.includes("cerai")) colors = "bg-orange-500/10 text-orange-400 border-orange-500/20";
+
+            return `<span class="px-2 py-0.5 text-[11px] font-medium border rounded-md ${colors}">${statusHidup}</span>`;
+        }
+
+        // Render Data Pekerja ke UI
+        function renderData() {
+            const list = getPekerjaData();
+            const search = searchInput.value.toLowerCase();
+
+            const filtered = list.filter(p => 
+                p.name.toLowerCase().includes(search) ||
+                p.penempatan.toLowerCase().includes(search) ||
+                p.asal.toLowerCase().includes(search)
+            );
+
+            statTotal.textContent = list.length;
+            statAktif.textContent = list.filter(p => p.status === 'Aktif').length;
+
+            pekerjaTableBody.innerHTML = '';
+            mobileCards.innerHTML = '';
+
+            if (filtered.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            filtered.forEach(p => {
+                // 1. RENDER TABLE DESKTOP
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-800/40 transition-colors text-slate-300 text-sm border-b border-slate-800/60";
+                tr.innerHTML = `
+                    <td class="py-4 px-6 font-bold text-slate-100">${p.name}</td>
+                    <td class="py-4 px-6 font-semibold text-yellow-500 text-xs">${p.penempatan}</td>
+                    <td class="py-4 px-6 text-xs font-semibold text-slate-400">${p.umur} Thn</td>
+                    <td class="py-4 px-6 text-xs text-slate-400 capitalize">${p.asal}</td>
+                    <td class="py-4 px-6">${getStatusHidupBadge(p.statusHidup)}</td>
+                    <td class="py-4 px-6 text-center">${getStatusBadge(p.status)}</td>
+                    <td class="py-4 px-6">
+                        <div class="flex items-center justify-center gap-1.5">
+                            <button onclick="editPekerja('${p.id}')" class="p-1.5 text-blue-400 hover:bg-blue-950/30 border border-transparent hover:border-blue-900/40 rounded-lg transition-all" title="Edit">
+                                <i data-lucide="edit-3" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="deletePekerja('${p.id}')" class="p-1.5 text-red-400 hover:bg-red-950/30 border border-transparent hover:border-red-900/40 rounded-lg transition-all" title="Hapus">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                pekerjaTableBody.appendChild(tr);
+
+                // 2. RENDER CARD MOBILE
+                const card = document.createElement('div');
+                card.className = "bg-slate-900 p-4 rounded-xl border border-slate-800 shadow-sm space-y-3.5";
+                card.innerHTML = `
+                    <div class="flex items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
+                        <div class="min-w-0">
+                            <h4 class="font-bold text-slate-100 text-sm truncate">${p.name}</h4>
+                            <span class="text-[11px] text-slate-400 mt-0.5 block">${p.asal}</span>
+                        </div>
+                        <div class="flex items-center gap-1 flex-shrink-0">
+                            <button onclick="editPekerja('${p.id}')" class="p-1.5 text-blue-400 hover:bg-blue-950/30 rounded-lg transition-colors">
+                                <i data-lucide="edit-3" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="deletePekerja('${p.id}')" class="p-1.5 text-red-400 hover:bg-red-950/30 rounded-lg transition-colors">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-y-2.5 text-xs text-slate-300">
+                        <div>
+                            <span class="text-[10px] uppercase font-semibold text-slate-500 block tracking-wide">Penempatan</span>
+                            <span class="font-bold text-yellow-500 text-[11px] leading-tight block mt-0.5">${p.penempatan}</span>
+                        </div>
+                        <div>
+                            <span class="text-[10px] uppercase font-semibold text-slate-500 block tracking-wide">Umur Rentang</span>
+                            <span class="font-semibold text-slate-100 block mt-0.5">${p.umur} Tahun</span>
+                        </div>
+                        <div>
+                            <span class="text-[10px] uppercase font-semibold text-slate-500 block tracking-wide">Status Hidup</span>
+                            <div class="mt-0.5">${getStatusHidupBadge(p.statusHidup)}</div>
+                        </div>
+                        <div>
+                            <span class="text-[10px] uppercase font-semibold text-slate-500 block tracking-wide">Status Kerja</span>
+                            <div class="mt-0.5">${getStatusBadge(p.status)}</div>
+                        </div>
+                    </div>
+                `;
+                mobileCards.appendChild(card);
+            });
+
+            lucide.createIcons();
+        }
+
+        // --- CUSTOM TOAST NOTIFICATION ---
+        function showToast(message, type = 'success') {
+            toastMsg.textContent = message;
+            actionToast.className = "mb-4 p-3 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all duration-300";
+            
+            if (type === 'success') {
+                actionToast.classList.add('bg-emerald-500/10', 'text-emerald-400', 'border', 'border-emerald-500/20');
+                toastIcon.setAttribute('data-lucide', 'check-circle');
+            } else {
+                actionToast.classList.add('bg-rose-500/10', 'text-rose-400', 'border', 'border-rose-500/20');
+                toastIcon.setAttribute('data-lucide', 'x-circle');
+            }
+
+            actionToast.classList.remove('hidden');
+            lucide.createIcons();
+
+            setTimeout(() => {
+                actionToast.classList.add('hidden');
+            }, 3000);
+        }
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>
+
+
